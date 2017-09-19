@@ -1,0 +1,88 @@
+#!/bin/bash
+
+if [ "$(which python)" = "" ];
+then 
+   echo "Please install python!"
+   exit 1
+fi
+
+OLDPWD=$( pwd )
+CDIR=$( dirname "${BASH_SOURCE[0]}" )
+CDIR_TMP="${CDIR}/docker/tmp"
+CDIR_CNF="${CDIR}/docker/config"
+
+function help_txt() {
+echo "Script for running laravel container 
+
+laradock start 	            - Build image and run container 
+laradock remove             - Remove image and container 
+laradock stop	            - Stop container 
+
+laradock config             - List config options
+laradock config list        - List config
+laradock config edit <name> - Edit config
+"
+}
+
+function onstart() {
+	if [ $1 -eq 0 ];
+	then 
+		docker exec laradock /opt/add/onstart.sh;
+	fi;
+}
+
+function _start() {
+     if [ ! -f "${CDIR}/compose.yml" ];
+     then 
+	python "${CDIR}/docker/run/run.py" -tpl "${CDIR}/docker/templates/compose.tpl" -p "${CDIR_CNF}/ports" -v "${CDIR_CNF}/volumes" -l "${CDIR}" > "${CDIR_TMP}/compose.yml"
+     fi
+    
+     docker-compose -f "${CDIR_TMP}/compose.yml" up -d laradock 
+     onstart $?
+}
+
+function _remove() {
+	if [ -f "${CDIR_TMP}/compose.yml" ];
+	then 
+		rm "${CDIR_TMP}/compose.yml"
+	fi
+	docker container stop laradock
+	docker rm laradock
+	docker rmi laradock
+}
+
+
+CMD=$1
+
+if [ "$CMD" = "start" ];
+then
+	echo "Starting..."
+	_start
+elif [ "$CMD" = "remove" ];
+then 
+	echo "Removing image and container"
+	_remove
+elif [ "$CMD" = "stop" ];
+then 
+	echo "Stoping container..."
+	docker container stop laradock
+elif [ "$CMD" = "config" ];
+then
+	if [ ! "$2" = "" ];
+	then
+		if [ ! -f "${CDIR_CNF}/$2" ];
+		then 
+			echo "Config not found"
+		else
+			nano "${CDIR_CNF}/$2"	
+		fi
+	else
+		for conf in $(ls "${CDIR_CNF}");
+		do 
+			echo "  - ${conf}"
+		done
+	fi;
+else
+	help_txt
+fi;
+

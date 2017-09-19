@@ -1,0 +1,16 @@
+version: '3'
+services:
+  laradock:
+    image: laradock
+    build: 
+      context: /Users/DMenkovic/projects/docker-hub/webapp
+      dockerfile: /Users/DMenkovic/projects/docker-hub/webapp/docker/Dockerfile
+    container_name: laradock
+    ports:
+      - 6666:80
+      - 5656:8080
+    volumes:
+      - ../../app:/var/www/app
+    privileged: true
+
+
