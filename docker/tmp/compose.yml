@@ -7,7 +7,7 @@ services:
       dockerfile: /home/dalibor/projects/laradock/docker/Dockerfile
     container_name: laradock
     ports:
-      - 8080:80
+      - 10000:80
       - 5656:8080
     volumes:
       - ../../app:/var/www/app

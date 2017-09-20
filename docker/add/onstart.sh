@@ -6,9 +6,10 @@ then
 	do 
 		cp "/opt/add/vhosts/${i}" "/etc/apache2/sites-available/${i}"
 		ln -s "/etc/apache2/sites-available/${i}" "/etc/apache2/sites-enabled/${i}"
+		rm "/opt/add/vhosts/${i}"
 	done
 
-	rm -rf /opt/add/vhosts
+	rm -rf "/opt/add/vhosts"
 	cd /var/www/app
 	composer create-project --prefer-dist laravel/laravel .
 fi

@@ -31,7 +31,7 @@ function onstart() {
 }
 
 function _start() {
-     if [ ! -f "${CDIR}/compose.yml" ];
+     if [ ! -f "${CDIR_TMP}/compose.yml" ];
      then 
 	python "${CDIR}/docker/run/run.py" -tpl "${CDIR}/docker/templates/compose.tpl" -p "${CDIR_CNF}/ports" -v "${CDIR_CNF}/volumes" -l "${CDIR}" > "${CDIR_TMP}/compose.yml"
      fi

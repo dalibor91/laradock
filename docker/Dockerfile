@@ -28,6 +28,7 @@ RUN php -r " file_put_contents('c.php', file_get_contents('https://getcomposer.o
 RUN composer global require "laravel/installer"
 
 RUN echo "\nPATH=\"\$PATH:\$HOME/.composer/vendor/bin\"" >> $HOME/.bashrc
+RUN echo "\n127.0.0.1 laravel.dev" >> /etc/hosts
 
 #custom install 
 COPY docker/add /opt/add
