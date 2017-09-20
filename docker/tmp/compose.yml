@@ -1,13 +1,13 @@
-version: '3'
+version: '2'
 services:
   laradock:
     image: laradock
     build: 
-      context: /Users/DMenkovic/projects/docker-hub/webapp
-      dockerfile: /Users/DMenkovic/projects/docker-hub/webapp/docker/Dockerfile
+      context: /home/dalibor/projects/laradock
+      dockerfile: /home/dalibor/projects/laradock/docker/Dockerfile
     container_name: laradock
     ports:
-      - 6666:80
+      - 8080:80
       - 5656:8080
     volumes:
       - ../../app:/var/www/app

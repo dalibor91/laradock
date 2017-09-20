@@ -19,8 +19,7 @@ laradock remove             - Remove image and container
 laradock stop	            - Stop container 
 
 laradock config             - List config options
-laradock config list        - List config
-laradock config edit <name> - Edit config
+laradock config <name>      - Edit config
 "
 }
 
@@ -49,6 +48,16 @@ function _remove() {
 	docker container stop laradock
 	docker rm laradock
 	docker rmi laradock
+
+	if [ -d "${CDIR}/app" ];
+	then
+		echo "Remove ${CDIR}/app? y/n"
+		read rcdir
+		if [ "${rcdir}" = "y" ];
+		then 
+			rm -rf "${CDIR}/app"
+		fi
+	fi
 }
 
 
