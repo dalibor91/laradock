@@ -14,4 +14,10 @@ then
 	composer create-project --prefer-dist laravel/laravel .
 fi
 
+{
+	service mysql start 
+} &
 
+
+
+disown

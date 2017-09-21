@@ -34,5 +34,8 @@ RUN echo "\n127.0.0.1 laravel.dev" >> /etc/hosts
 COPY docker/add /opt/add
 RUN chmod +x /opt/add/onstart.sh
 
+EXPOSE 80 
+EXPOSE 3306
+
 CMD ["/usr/sbin/apache2ctl","-DFOREGROUND"]
 

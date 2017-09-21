@@ -2,13 +2,15 @@ version: '2'
 services:
   laradock:
     image: laradock
+    hostname: laradocksrv
+    extra_hosts:
+      - "laradock:127.0.0.1"
     build: 
-      context: /home/dalibor/projects/laradock
-      dockerfile: /home/dalibor/projects/laradock/docker/Dockerfile
+      context: /Users/DMenkovic/projects/docker-hub/laradock
+      dockerfile: /Users/DMenkovic/projects/docker-hub/laradock/docker/Dockerfile
     container_name: laradock
     ports:
-      - 10000:80
-      - 5656:8080
+      - 10080:80
     volumes:
       - ../../app:/var/www/app
     privileged: true

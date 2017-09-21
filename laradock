@@ -6,6 +6,13 @@ then
    exit 1
 fi
 
+DEBUG=0
+
+for i in $@;
+do
+	if [ "$i" == '--debug' ]; then DEBUG=1; fi
+done
+
 OLDPWD=$( pwd )
 CDIR=$( dirname "${BASH_SOURCE[0]}" )
 CDIR_TMP="${CDIR}/docker/tmp"
@@ -17,34 +24,72 @@ echo "Script for running laravel container
 laradock start 	            - Build image and run container 
 laradock remove             - Remove image and container 
 laradock stop	            - Stop container 
+laradock login              - Login to container
 
 laradock config             - List config options
 laradock config <name>      - Edit config
 "
 }
 
+function _dbg() {
+	if [ "$DEBUG" = "1" ];
+	then
+		echo "[ $(date) ] $1"
+	fi
+}
+
+_dbg "OLDPWD=$OLDPWD"
+_dbg "CDIR=$CDIR"
+_dbg "CDIR_TMP=$CDIR_TMP"
+_dbg "CDIR_CNF=$CDIR_CNF"
+
 function onstart() {
 	if [ $1 -eq 0 ];
 	then 
+		_dbg "docker exec laradock /opt/add/onstart.sh;"
 		docker exec laradock /opt/add/onstart.sh;
 	fi;
 }
 
+function _stop() {
+	_dbg "docker container stop laradock"
+	docker container stop laradock
+}
+
 function _start() {
+
+     local _restart=0
+
      if [ ! -f "${CDIR_TMP}/compose.yml" ];
      then 
+	_dbg "python \"${CDIR}/docker/run/run.py\" -tpl \"${CDIR}/docker/templates/compose.tpl\" -p \"${CDIR_CNF}/ports\" -v \"${CDIR_CNF}/volumes\" -l \"${CDIR}\" > \"${CDIR_TMP}/compose.yml\""
 	python "${CDIR}/docker/run/run.py" -tpl "${CDIR}/docker/templates/compose.tpl" -p "${CDIR_CNF}/ports" -v "${CDIR_CNF}/volumes" -l "${CDIR}" > "${CDIR_TMP}/compose.yml"
+	local _restart=1
      fi
-    
+
+     _dbg "docker-compose -f \"${CDIR_TMP}/compose.yml\" up -d laradock "    
      docker-compose -f "${CDIR_TMP}/compose.yml" up -d laradock 
      onstart $?
+
+     if [ "$_restart" = "1" ];
+     then 
+	_stop
+	_start
+     fi
+
 }
 
 function _remove() {
 	if [ -f "${CDIR_TMP}/compose.yml" ];
 	then 
+		_dbg "rm \"${CDIR_TMP}/compose.yml\""
 		rm "${CDIR_TMP}/compose.yml"
 	fi
+	
+	_dbg "docker container stop laradock"
+	_dbg "docker rm laradock"
+	_dbg "docker rmi laradock"
+
 	docker container stop laradock
 	docker rm laradock
 	docker rmi laradock
@@ -55,26 +100,34 @@ function _remove() {
 		read rcdir
 		if [ "${rcdir}" = "y" ];
 		then 
+			_dbg "rm -rf \"${CDIR}/app\""
 			rm -rf "${CDIR}/app"
 		fi
 	fi
 }
 
+function _login() {
+	_dbg "docker exec -it laradock /bin/bash"
+	docker exec -it laradock /bin/bash
+}
+
 
 CMD=$1
 
+_dbg "CMD=$CMD"
+
 if [ "$CMD" = "start" ];
 then
-	echo "Starting..."
 	_start
 elif [ "$CMD" = "remove" ];
 then 
-	echo "Removing image and container"
 	_remove
 elif [ "$CMD" = "stop" ];
 then 
-	echo "Stoping container..."
-	docker container stop laradock
+	_stop
+elif [ "$CMD" = "login" ];
+then
+	_login
 elif [ "$CMD" = "config" ];
 then
 	if [ ! "$2" = "" ];
@@ -92,6 +145,7 @@ then
 		done
 	fi;
 else
+	_dbg "Show help text"
 	help_txt
 fi;
 
